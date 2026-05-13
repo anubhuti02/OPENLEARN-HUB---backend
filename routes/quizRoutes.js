@@ -203,7 +203,11 @@ router.post('/:id/submit', protect, async (req, res) => {
     progress.lastUpdated = Date.now();
     await progress.save();
 
-    res.status(201).json(submission);
+    // Include quiz questions for answer review in response
+    const responseData = submission.toObject();
+    responseData.quizQuestions = quiz.questions;
+    
+    res.status(201).json(responseData);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

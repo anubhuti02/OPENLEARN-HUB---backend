@@ -34,8 +34,19 @@ export const getAIResponse = async (query, userId) => {
         if (text) return text;
       } catch (geminiErr) {
         console.error('Gemini API Error:', geminiErr.message);
-        // Fall through to fallback
+        
+        // Check for specific error types
+        if (geminiErr.message.includes('quota') || geminiErr.message.includes('429')) {
+          return "I'm sorry, I've reached my daily question limit. Please try again later or explore your courses in the meantime!";
+        }
+        if (geminiErr.message.includes('invalid') || geminiErr.message.includes('API key')) {
+          return "There was an issue with my configuration. Please check back later!";
+        }
+        
+        // Fall through to fallback for other errors
       }
+    } else {
+      console.warn('Gemini API key not configured');
     }
 
     // 3. Fallback Smart Response (Knowledge-based)
@@ -69,5 +80,6 @@ const getSmartFallback = (query, courses, topics) => {
     return "Our platform uses K-Means for clustering your performance (Weak/Average/Strong) and Random Forest to predict your future levels. Check your dashboard for the charts!";
   }
 
-  return "That's a great question! While I'm currently in 'offline mode' (waiting for my Gemini API key), I can tell you that OpenLearn Hub is designed to help you master topics through quizzes and data-driven analytics. Feel free to explore your courses!";
+  // If API key is missing, don't mention "offline mode" - just give a helpful response
+  return "That's a great question! OpenLearn Hub is designed to help you master topics through quizzes and data-driven analytics. Feel free to explore your courses and let me know if you have any questions about them!";
 };
